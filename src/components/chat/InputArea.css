@@ -1,0 +1,82 @@
+.input-area {
+  padding: 16px 20px;
+  border-top: 1px solid var(--color-border);
+  background-color: var(--color-bg);
+}
+
+.input-area-wrapper {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.input-attach-btn {
+  padding: 8px;
+  border: none;
+  background: transparent;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  border-radius: var(--border-radius);
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.input-attach-btn:hover {
+  background-color: var(--color-hover);
+  color: var(--color-text);
+}
+
+.input-textarea {
+  flex: 1;
+  padding: 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius);
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  font-size: 14px;
+  font-family: inherit;
+  resize: none;
+  outline: none;
+  transition: border-color 0.2s;
+  min-height: 48px;
+  max-height: 120px;
+  line-height: 1.5;
+}
+
+.input-textarea:focus {
+  border-color: var(--color-primary);
+}
+
+.input-textarea::placeholder {
+  color: var(--color-text-secondary);
+}
+
+.input-actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.input-stop-btn {
+  align-self: center;
+}
+
+.input-send-btn {
+  align-self: center;
+}
+
+@media (max-width: 768px) {
+  .input-area {
+    padding: 12px;
+  }
+
+  .input-area-wrapper {
+    gap: 8px;
+  }
+
+  .input-send-btn span {
+    display: none;
+  }
+}

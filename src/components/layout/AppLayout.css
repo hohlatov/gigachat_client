@@ -1,0 +1,11 @@
+.app-layout {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+}
+
+@media (min-width: 769px) {
+  .app-layout {
+    margin-left: var(--sidebar-width);
+  }
+}
