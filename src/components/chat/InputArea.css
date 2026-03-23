@@ -8,6 +8,7 @@
   display: flex;
   align-items: flex-end;
   gap: 12px;
+  width: 100%;
   max-width: 1000px;
   margin: 0 auto;
 }
@@ -74,6 +75,8 @@
 
   .input-area-wrapper {
     gap: 8px;
+    max-width: none;
+    margin: 0;
   }
 
   .input-send-btn span {

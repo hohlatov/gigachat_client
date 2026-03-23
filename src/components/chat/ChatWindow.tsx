@@ -43,6 +43,17 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
 
   const createId = () => `${Date.now()}-${Math.random().toString(36).slice(2)}`;
 
+  const handleStopGeneration = () => {
+    if (!isLoading) return;
+
+    if (assistantTimeoutRef.current) {
+      clearTimeout(assistantTimeoutRef.current);
+      assistantTimeoutRef.current = null;
+    }
+
+    setIsLoading(false);
+  };
+
   const handleSendMessage = (text: string) => {
     const trimmed = text.trim();
     if (!trimmed || isLoading) return;
@@ -106,7 +117,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
       <MessageList messages={messages} isLoading={isLoading}>
         <div ref={messagesEndRef} />
       </MessageList>
-      <InputArea onSend={handleSendMessage} disabled={isLoading} />
+      <InputArea onSend={handleSendMessage} onStop={handleStopGeneration} disabled={isLoading} />
     </div>
   );
 };
