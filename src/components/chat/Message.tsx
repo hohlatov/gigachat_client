@@ -5,11 +5,12 @@ import './Message.css';
 
 interface MessageProps {
   message: MessageType;
+  variant: 'user' | 'assistant';
 }
 
-export const Message: React.FC<MessageProps> = ({ message }) => {
+export const Message: React.FC<MessageProps> = ({ message, variant }) => {
   const [isCopied, setIsCopied] = useState(false);
-  const isUser = message.role === 'user';
+  const isUser = variant === 'user';
 
   const handleCopy = async () => {
     try {
@@ -29,7 +30,7 @@ export const Message: React.FC<MessageProps> = ({ message }) => {
   };
 
   return (
-    <div className={`message message-${message.role}`}>
+    <div className={`message message-${variant}`}>
       {!isUser && (
         <div className="message-avatar">
           <svg viewBox="0 0 24 24" fill="currentColor">

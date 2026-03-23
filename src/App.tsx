@@ -147,23 +147,13 @@ const defaultSettings: Settings = {
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [chats] = useState<Chat[]>(mockChats);
-  const [messages] = useState<Message[]>(mockMessages);
+  const initialMessages = mockMessages;
   const [activeChatId, setActiveChatId] = useState<string | null>('1');
   const [settings, setSettings] = useState<Settings>(defaultSettings);
-  const [isTyping, setIsTyping] = useState(false);
 
   const handleLogin = (credentials: AuthCredentials) => {
     console.log('Login with:', credentials);
     setIsAuthenticated(true);
-  };
-
-  const handleSendMessage = (message: string) => {
-    console.log('Send message:', message);
-    setIsTyping(true);
-    // Mock typing delay
-    setTimeout(() => {
-      setIsTyping(false);
-    }, 2000);
   };
 
   const handleSettingsSave = (newSettings: Settings) => {
@@ -190,15 +180,13 @@ function App() {
   return (
     <AppLayout
       chats={chats}
-      messages={messages}
       activeChatId={activeChatId}
       settings={settings}
-      isTyping={isTyping}
+      initialMessages={initialMessages}
       onChatSelect={setActiveChatId}
       onNewChat={handleNewChat}
       onEditChat={handleEditChat}
       onDeleteChat={handleDeleteChat}
-      onSendMessage={handleSendMessage}
       onSettingsSave={handleSettingsSave}
     />
   );

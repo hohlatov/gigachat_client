@@ -1,7 +1,6 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Message as MessageType, Chat as ChatType } from '../../types';
 import { MessageList } from './MessageList';
-import { TypingIndicator } from './TypingIndicator';
 import { InputArea } from './InputArea';
 import { Button } from '../ui/Button';
 import { EmptyState } from '../ui/EmptyState';
@@ -9,21 +8,74 @@ import './ChatWindow.css';
 
 interface ChatWindowProps {
   activeChat: ChatType | null;
-  messages: MessageType[];
-  onSendMessage: (message: string) => void;
+  initialMessages: MessageType[];
   onSettingsClick: () => void;
   onMenuClick?: () => void;
-  isTyping?: boolean;
 }
 
 export const ChatWindow: React.FC<ChatWindowProps> = ({
   activeChat,
-  messages,
-  onSendMessage,
+  initialMessages,
   onSettingsClick,
   onMenuClick,
-  isTyping = false,
 }) => {
+  const [messages, setMessages] = useState<MessageType[]>(initialMessages);
+  const [isLoading, setIsLoading] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const assistantTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    if (assistantTimeoutRef.current) clearTimeout(assistantTimeoutRef.current);
+    setMessages(initialMessages);
+    setIsLoading(false);
+  }, [activeChat?.id, initialMessages]);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+
+  useEffect(() => {
+    return () => {
+      if (assistantTimeoutRef.current) clearTimeout(assistantTimeoutRef.current);
+    };
+  }, []);
+
+  const createId = () => `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+
+  const handleSendMessage = (text: string) => {
+    const trimmed = text.trim();
+    if (!trimmed || isLoading) return;
+
+    // Clear any pending mock assistant response (e.g. if component unmounted quickly).
+    if (assistantTimeoutRef.current) clearTimeout(assistantTimeoutRef.current);
+
+    const userMessage: MessageType = {
+      id: createId(),
+      content: trimmed,
+      role: 'user',
+      timestamp: new Date(),
+    };
+
+    setMessages((prev) => [...prev, userMessage]);
+    setIsLoading(true);
+
+    // Typing indicator appeared after user message; keep the view pinned to the bottom.
+    setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 0);
+
+    assistantTimeoutRef.current = setTimeout(() => {
+      const assistantMessage: MessageType = {
+        id: createId(),
+        content: `Мок-ответ ассистента. Вы написали: "${trimmed}"`,
+        role: 'assistant',
+        timestamp: new Date(),
+      };
+
+      setMessages((prev) => [...prev, assistantMessage]);
+      setIsLoading(false);
+    }, 1000 + Math.random() * 1000); // 1–2 сек
+  };
+
   if (!activeChat) {
     return (
       <div className="chat-window">
@@ -51,9 +103,10 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
           </svg>
         </Button>
       </header>
-      <MessageList messages={messages} />
-      {isTyping && <TypingIndicator isVisible={true} />}
-      <InputArea onSend={onSendMessage} disabled={isTyping} />
+      <MessageList messages={messages} isLoading={isLoading}>
+        <div ref={messagesEndRef} />
+      </MessageList>
+      <InputArea onSend={handleSendMessage} disabled={isLoading} />
     </div>
   );
 };

@@ -7,29 +7,25 @@ import './AppLayout.css';
 
 interface AppLayoutProps {
   chats: Chat[];
-  messages: MessageType[];
   activeChatId: string | null;
   settings: Settings;
-  isTyping?: boolean;
+  initialMessages: MessageType[];
   onChatSelect: (chatId: string) => void;
   onNewChat: () => void;
   onEditChat: (chatId: string) => void;
   onDeleteChat: (chatId: string) => void;
-  onSendMessage: (message: string) => void;
   onSettingsSave: (settings: Settings) => void;
 }
 
 export const AppLayout: React.FC<AppLayoutProps> = ({
   chats,
-  messages,
   activeChatId,
   settings,
-  isTyping = false,
+  initialMessages,
   onChatSelect,
   onNewChat,
   onEditChat,
   onDeleteChat,
-  onSendMessage,
   onSettingsSave,
 }) => {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -59,11 +55,9 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
       />
       <ChatWindow
         activeChat={activeChat}
-        messages={messages}
-        onSendMessage={onSendMessage}
+        initialMessages={initialMessages}
         onSettingsClick={() => setIsSettingsOpen(true)}
         onMenuClick={() => setIsSidebarOpen(true)}
-        isTyping={isTyping}
       />
       <SettingsPanel
         isOpen={isSettingsOpen}

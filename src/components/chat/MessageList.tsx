@@ -1,29 +1,23 @@
-import React, { useEffect, useRef } from 'react';
+import React from 'react';
 import { Message as MessageType } from '../../types';
 import { Message } from './Message';
+import { TypingIndicator } from './TypingIndicator';
 import './MessageList.css';
 
 interface MessageListProps {
   messages: MessageType[];
+  isLoading: boolean;
+  children?: React.ReactNode;
 }
 
-export const MessageList: React.FC<MessageListProps> = ({ messages }) => {
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
-
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
-
+export const MessageList: React.FC<MessageListProps> = ({ messages, isLoading, children }) => {
   return (
     <div className="message-list">
       {messages.map((message) => (
-        <Message key={message.id} message={message} />
+        <Message key={message.id} message={message} variant={message.role} />
       ))}
-      <div ref={messagesEndRef} />
+      <TypingIndicator isVisible={isLoading} />
+      {children}
     </div>
   );
 };
