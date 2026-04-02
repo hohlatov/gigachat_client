@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
+import rehypeHighlight from 'rehype-highlight';
 import { Message as MessageType } from '../../types';
 import './Message.css';
 
@@ -47,8 +48,8 @@ export const Message: React.FC<MessageProps> = ({ message, variant }) => {
         </div>
         <div className="message-body">
           <ReactMarkdown
+            rehypePlugins={[rehypeHighlight]}
             components={{
-              // ✅ Исправлено для react-markdown v9+
               code({ className, children, ...props }) {
                 const isInline = !className?.includes('language-');
                 

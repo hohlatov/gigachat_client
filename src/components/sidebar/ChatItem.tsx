@@ -36,7 +36,7 @@ export const ChatItem: React.FC<ChatItemProps> = ({
       <div className="chat-item-content">
         <div className="chat-item-title">{chat.title}</div>
         <div className="chat-item-meta">
-          <span className="chat-item-date">{formatDate(chat.lastMessageTime)}</span>
+          <span className="chat-item-date">{formatDate(chat.updatedAt)}</span>
         </div>
       </div>
       <div className="chat-item-actions">

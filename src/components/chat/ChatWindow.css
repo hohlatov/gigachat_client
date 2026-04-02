@@ -49,6 +49,15 @@
   color: var(--color-text);
 }
 
+.chat-window-error {
+  margin: 8px 16px 0;
+  padding: 8px 12px;
+  border-radius: 8px;
+  color: #b42318;
+  background-color: #fee4e2;
+  font-size: 13px;
+}
+
 @media (max-width: 768px) {
   .chat-window-header {
     padding: 12px 16px;

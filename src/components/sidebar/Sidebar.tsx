@@ -10,7 +10,7 @@ interface SidebarProps {
   activeChatId: string | null;
   onChatSelect: (chatId: string) => void;
   onNewChat: () => void;
-  onEditChat: (chatId: string) => void;
+  onEditChat: (chatId: string, title: string) => void;
   onDeleteChat: (chatId: string) => void;
   isOpen?: boolean;
   onClose?: () => void;
@@ -28,9 +28,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
 
-  const filteredChats = chats.filter((chat) =>
-    chat.title.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const query = searchQuery.toLowerCase();
+  const filteredChats = chats.filter((chat) => {
+    const titleMatch = chat.title.toLowerCase().includes(query);
+    const lastMessage = chat.messages.at(-1)?.content.toLowerCase() ?? '';
+    return titleMatch || lastMessage.includes(query);
+  });
 
   return (
     <>

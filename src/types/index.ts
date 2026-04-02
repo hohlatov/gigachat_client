@@ -1,16 +1,16 @@
 export interface Message {
   id: string;
   content: string;
-  role: 'user' | 'assistant';
+  role: 'system' | 'user' | 'assistant';
   timestamp: Date;
 }
 
 export interface Chat {
   id: string;
   title: string;
-  lastMessage: string;
-  lastMessageTime: Date;
-  isActive?: boolean;
+  messages: Message[];
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface Settings {
@@ -26,3 +26,21 @@ export interface AuthCredentials {
   credentials: string;
   scope: 'GIGACHAT_API_PERS' | 'GIGACHAT_API_B2B' | 'GIGACHAT_API_CORP';
 }
+
+export interface ChatState {
+  chats: Chat[];
+  activeChatId: string | null;
+  isLoading: boolean;
+  error: string | null;
+}
+
+export type ChatAction =
+  | { type: 'LOAD_STATE'; payload: Pick<ChatState, 'chats' | 'activeChatId'> }
+  | { type: 'CREATE_CHAT'; payload: { id: string; title: string } }
+  | { type: 'SET_ACTIVE_CHAT'; payload: string | null }
+  | { type: 'RENAME_CHAT'; payload: { chatId: string; title: string } }
+  | { type: 'DELETE_CHAT'; payload: { chatId: string } }
+  | { type: 'ADD_MESSAGE'; payload: { chatId: string; message: Message } }
+  | { type: 'UPDATE_MESSAGE'; payload: { chatId: string; messageId: string; content: string } }
+  | { type: 'SET_LOADING'; payload: boolean }
+  | { type: 'SET_ERROR'; payload: string | null };

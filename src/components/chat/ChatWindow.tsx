@@ -1,65 +1,54 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { Message as MessageType, Chat as ChatType } from '../../types';
+import React, { useEffect, useRef } from 'react';
+import { Chat as ChatType, Message as MessageType, Settings } from '../../types';
 import { MessageList } from './MessageList';
 import { InputArea } from './InputArea';
 import { Button } from '../ui/Button';
 import { EmptyState } from '../ui/EmptyState';
+import { useChatDispatch } from '../../store/chatStore';
+import { requestAssistantReply } from '../../api/gigachat';
 import './ChatWindow.css';
 
 interface ChatWindowProps {
   activeChat: ChatType | null;
-  initialMessages: MessageType[];
+  isLoading: boolean;
+  error: string | null;
+  settings: Settings;
+  accessToken: string;
   onSettingsClick: () => void;
   onMenuClick?: () => void;
 }
 
 export const ChatWindow: React.FC<ChatWindowProps> = ({
   activeChat,
-  initialMessages,
+  isLoading,
+  error,
+  settings,
+  accessToken,
   onSettingsClick,
   onMenuClick,
 }) => {
-  const [messages, setMessages] = useState<MessageType[]>(initialMessages);
-  const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-
-  const assistantTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  useEffect(() => {
-    if (assistantTimeoutRef.current) clearTimeout(assistantTimeoutRef.current);
-    setMessages(initialMessages);
-    setIsLoading(false);
-  }, [activeChat?.id, initialMessages]);
+  const dispatch = useChatDispatch();
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
-
-  useEffect(() => {
-    return () => {
-      if (assistantTimeoutRef.current) clearTimeout(assistantTimeoutRef.current);
-    };
-  }, []);
+  }, [activeChat?.messages, isLoading]);
 
   const createId = () => `${Date.now()}-${Math.random().toString(36).slice(2)}`;
 
-  const handleStopGeneration = () => {
-    if (!isLoading) return;
+  const handleStopGeneration = () => dispatch({ type: 'SET_LOADING', payload: false });
 
-    if (assistantTimeoutRef.current) {
-      clearTimeout(assistantTimeoutRef.current);
-      assistantTimeoutRef.current = null;
+  const makeChatTitle = (value: string) => {
+    const normalized = value.trim().replace(/\s+/g, ' ');
+    if (normalized.length >= 5) {
+      return normalized.length > 40 ? `${normalized.slice(0, 40)}...` : normalized;
     }
-
-    setIsLoading(false);
+    return 'Новый чат';
   };
 
-  const handleSendMessage = (text: string) => {
+  const handleSendMessage = async (text: string) => {
     const trimmed = text.trim();
-    if (!trimmed || isLoading) return;
-
-    // Clear any pending mock assistant response (e.g. if component unmounted quickly).
-    if (assistantTimeoutRef.current) clearTimeout(assistantTimeoutRef.current);
+    if (!trimmed || isLoading || !activeChat) return;
 
     const userMessage: MessageType = {
       id: createId(),
@@ -68,23 +57,54 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
       timestamp: new Date(),
     };
 
-    setMessages((prev) => [...prev, userMessage]);
-    setIsLoading(true);
+    if (!activeChat.messages.length && activeChat.title === 'Новый чат') {
+      dispatch({
+        type: 'RENAME_CHAT',
+        payload: { chatId: activeChat.id, title: makeChatTitle(trimmed) },
+      });
+    }
 
-    // Typing indicator appeared after user message; keep the view pinned to the bottom.
-    setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 0);
+    dispatch({ type: 'ADD_MESSAGE', payload: { chatId: activeChat.id, message: userMessage } });
+    dispatch({ type: 'SET_LOADING', payload: true });
+    dispatch({ type: 'SET_ERROR', payload: null });
 
-    assistantTimeoutRef.current = setTimeout(() => {
-      const assistantMessage: MessageType = {
-        id: createId(),
-        content: `Мок-ответ ассистента. Вы написали: "${trimmed}"`,
-        role: 'assistant',
-        timestamp: new Date(),
-      };
+    const assistantId = createId();
+    dispatch({
+      type: 'ADD_MESSAGE',
+      payload: {
+        chatId: activeChat.id,
+        message: { id: assistantId, content: '', role: 'assistant', timestamp: new Date() },
+      },
+    });
 
-      setMessages((prev) => [...prev, assistantMessage]);
-      setIsLoading(false);
-    }, 1000 + Math.random() * 1000); // 1–2 сек
+    try {
+      const nextMessages = [...activeChat.messages, userMessage];
+      await requestAssistantReply({
+        messages: nextMessages,
+        settings,
+        accessToken,
+        onChunk: (content) =>
+          dispatch({
+            type: 'UPDATE_MESSAGE',
+            payload: { chatId: activeChat.id, messageId: assistantId, content },
+          }),
+      });
+    } catch (apiError) {
+      dispatch({
+        type: 'UPDATE_MESSAGE',
+        payload: {
+          chatId: activeChat.id,
+          messageId: assistantId,
+          content: 'Не удалось получить ответ от API. Проверьте токен и настройки подключения.',
+        },
+      });
+      dispatch({
+        type: 'SET_ERROR',
+        payload: apiError instanceof Error ? apiError.message : 'API error',
+      });
+    } finally {
+      dispatch({ type: 'SET_LOADING', payload: false });
+    }
   };
 
   if (!activeChat) {
@@ -114,9 +134,10 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
           </svg>
         </Button>
       </header>
-      <MessageList messages={messages} isLoading={isLoading}>
+      <MessageList messages={activeChat.messages} isLoading={isLoading}>
         <div ref={messagesEndRef} />
       </MessageList>
+      {error && <div className="chat-window-error">{error}</div>}
       <InputArea onSend={handleSendMessage} onStop={handleStopGeneration} disabled={isLoading} />
     </div>
   );

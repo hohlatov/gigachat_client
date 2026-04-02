@@ -77,6 +77,34 @@
   color: var(--color-text-secondary);
 }
 
+.auth-hint {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--color-text-secondary);
+}
+
+.auth-hint-secondary {
+  margin-top: 4px;
+}
+
+.auth-hint-code {
+  font-family: ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, Consolas, monospace;
+  font-size: 11px;
+  padding: 1px 5px;
+  border-radius: 4px;
+  background-color: var(--color-hover);
+  color: var(--color-text);
+  word-break: break-all;
+}
+
+.auth-hint-code-block {
+  display: block;
+  margin-top: 6px;
+  padding: 8px 10px;
+  white-space: pre-wrap;
+}
+
 .auth-radio-group {
   display: flex;
   flex-direction: column;

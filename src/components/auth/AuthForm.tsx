@@ -5,24 +5,43 @@ import { ErrorMessage } from '../ui/ErrorMessage';
 import './AuthForm.css';
 
 interface AuthFormProps {
-  onLogin: (credentials: AuthCredentials) => void;
+  onLogin: (credentials: AuthCredentials) => Promise<void> | void;
 }
 
 export const AuthForm: React.FC<AuthFormProps> = ({ onLogin }) => {
   const [credentials, setCredentials] = useState('');
   const [scope, setScope] = useState<AuthCredentials['scope']>('GIGACHAT_API_PERS');
   const [error, setError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
 
     if (!credentials.trim()) {
-      setError('Пожалуйста, введите пароль');
+      setError('Введите client_id:client_secret или Base64 этой пары');
       return;
     }
 
-    onLogin({ credentials: credentials.trim(), scope });
+    try {
+      setIsSubmitting(true);
+      await onLogin({ credentials: credentials.trim(), scope });
+    } catch (loginError) {
+      const message =
+        loginError instanceof Error ? loginError.message : 'Не удалось получить токен';
+      if (
+        message === 'Failed to fetch' ||
+        (loginError instanceof TypeError && message.toLowerCase().includes('fetch'))
+      ) {
+        setError(
+          'Не удалось связаться с сервером (часто сеть или CORS). Перезапустите npm start — в разработке используется прокси. Проверьте VPN и доступ к интернету.'
+        );
+      } else {
+        setError(message);
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -42,7 +61,7 @@ export const AuthForm: React.FC<AuthFormProps> = ({ onLogin }) => {
         <form onSubmit={handleSubmit} className="auth-form-content">
           <div className="auth-field">
             <label className="auth-label" htmlFor="credentials">
-              Password
+              Учётные данные OAuth (Basic)
             </label>
             <input
               type="password"
@@ -50,9 +69,31 @@ export const AuthForm: React.FC<AuthFormProps> = ({ onLogin }) => {
               value={credentials}
               onChange={(e) => setCredentials(e.target.value)}
               className="auth-input"
-              placeholder="Введите пароль"
+              placeholder="client_id:client_secret или Base64"
               autoComplete="off"
+              disabled={isSubmitting}
             />
+            <p className="auth-hint">
+              В личном кабинете GigaChat возьмите <code className="auth-hint-code">client_id</code> и{' '}
+              <code className="auth-hint-code">client_secret</code>. Можно вставить строку{' '}
+              <code className="auth-hint-code">client_id:client_secret</code> — приложение само
+              закодирует её в Base64. Либо вставьте уже готовую Base64-строку (без префикса «Basic »).
+              После входа будет получен <code className="auth-hint-code">access_token</code> по OAuth.
+            </p>
+            <p className="auth-hint auth-hint-secondary">
+              Пример в Node.js:
+              <code className="auth-hint-code auth-hint-code-block">
+                {`Buffer.from('client_id:client_secret').toString('base64')`}
+              </code>
+            </p>
+            <p className="auth-hint auth-hint-secondary">
+              Локально запросы к GigaChat идут через прокси dev-сервера (иначе браузер блокирует их
+              из‑за CORS). Не задавайте в <code className="auth-hint-code">.env</code> относительные
+              пути вроде <code className="auth-hint-code">/api/v2/oauth</code> — оставьте переменные
+              пустыми или укажите полный <code className="auth-hint-code">https://...</code>. Если
+              видите «Failed to fetch», перезапустите <code className="auth-hint-code">npm start</code>
+              и проверьте VPN/сеть.
+            </p>
             {error && <ErrorMessage message={error} />}
           </div>
 
@@ -69,6 +110,7 @@ export const AuthForm: React.FC<AuthFormProps> = ({ onLogin }) => {
                     setScope(e.target.value as AuthCredentials['scope'])
                   }
                   className="auth-radio-input"
+                  disabled={isSubmitting}
                 />
                 <span className="auth-radio-label">Персональный</span>
               </label>
@@ -82,6 +124,7 @@ export const AuthForm: React.FC<AuthFormProps> = ({ onLogin }) => {
                     setScope(e.target.value as AuthCredentials['scope'])
                   }
                   className="auth-radio-input"
+                  disabled={isSubmitting}
                 />
                 <span className="auth-radio-label">B2B</span>
               </label>
@@ -95,14 +138,21 @@ export const AuthForm: React.FC<AuthFormProps> = ({ onLogin }) => {
                     setScope(e.target.value as AuthCredentials['scope'])
                   }
                   className="auth-radio-input"
+                  disabled={isSubmitting}
                 />
                 <span className="auth-radio-label">Корпоративный</span>
               </label>
             </div>
           </div>
 
-          <Button type="submit" variant="primary" size="lg" className="auth-submit-btn">
-            Войти
+          <Button
+            type="submit"
+            variant="primary"
+            size="lg"
+            className="auth-submit-btn"
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? 'Вход...' : 'Войти'}
           </Button>
         </form>
       </div>

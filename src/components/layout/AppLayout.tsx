@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Chat, Message as MessageType, Settings } from '../../types';
+import { Chat, Settings } from '../../types';
 import { Sidebar } from '../sidebar/Sidebar';
 import { ChatWindow } from '../chat/ChatWindow';
 import { SettingsPanel } from '../settings/SettingsPanel';
@@ -9,10 +9,12 @@ interface AppLayoutProps {
   chats: Chat[];
   activeChatId: string | null;
   settings: Settings;
-  initialMessages: MessageType[];
+  isLoading: boolean;
+  error: string | null;
+  accessToken: string;
   onChatSelect: (chatId: string) => void;
   onNewChat: () => void;
-  onEditChat: (chatId: string) => void;
+  onEditChat: (chatId: string, title: string) => void;
   onDeleteChat: (chatId: string) => void;
   onSettingsSave: (settings: Settings) => void;
 }
@@ -21,7 +23,9 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
   chats,
   activeChatId,
   settings,
-  initialMessages,
+  isLoading,
+  error,
+  accessToken,
   onChatSelect,
   onNewChat,
   onEditChat,
@@ -55,7 +59,10 @@ export const AppLayout: React.FC<AppLayoutProps> = ({
       />
       <ChatWindow
         activeChat={activeChat}
-        initialMessages={initialMessages}
+        isLoading={isLoading}
+        error={error}
+        settings={settings}
+        accessToken={accessToken}
         onSettingsClick={() => setIsSettingsOpen(true)}
         onMenuClick={() => setIsSidebarOpen(true)}
       />
