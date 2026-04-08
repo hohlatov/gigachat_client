@@ -13,7 +13,7 @@ const touchChat = <T extends { updatedAt: Date }>(chat: T): T => ({
   updatedAt: new Date(),
 });
 
-const reducer = (state: ChatState, action: ChatAction): ChatState => {
+export const reducer = (state: ChatState, action: ChatAction): ChatState => {
   switch (action.type) {
     case 'LOAD_STATE':
       return {

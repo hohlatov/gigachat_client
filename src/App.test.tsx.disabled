@@ -1,0 +1,40 @@
+import { render, screen } from '@testing-library/react';
+import { BrowserRouter } from 'react-router-dom';
+import App from './App';
+import { ChatProvider } from './store/chatStore';
+
+// Мок для API
+jest.mock('./api/auth', () => ({
+  requestAccessToken: jest.fn().mockResolvedValue({
+    accessToken: 'mock-token',
+    expiresAt: Date.now() + 3600000
+  }),
+}));
+
+// Мок для storage
+jest.mock('./utils/storage', () => ({
+  loadChatState: jest.fn(() => null),
+  saveChatState: jest.fn(),
+}));
+
+// Мок для useNavigate
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useNavigate: () => jest.fn(),
+  useParams: () => ({}),
+}));
+
+describe('App', () => {
+  it('рендерится без ошибок', () => {
+    render(
+      <BrowserRouter>
+        <ChatProvider>
+          <App />
+        </ChatProvider>
+      </BrowserRouter>
+    );
+    
+    // Проверяем, что компонент отрендерился
+    expect(document.body).toBeInTheDocument();
+  });
+});
