@@ -10,7 +10,8 @@ interface ChatItemProps {
   onDelete: (e: React.MouseEvent) => void;
 }
 
-export const ChatItem: React.FC<ChatItemProps> = ({
+// Оборачиваем в React.memo для предотвращения лишних ререндеров
+export const ChatItem: React.FC<ChatItemProps> = React.memo(({
   chat,
   isActive,
   onClick,
@@ -61,4 +62,6 @@ export const ChatItem: React.FC<ChatItemProps> = ({
       </div>
     </div>
   );
-};
+});
+
+ChatItem.displayName = 'ChatItem';

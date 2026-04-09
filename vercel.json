@@ -1,0 +1,14 @@
+{
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ],
+  "buildCommand": "npm run build",
+  "outputDirectory": "build",
+  "devCommand": "npm start",
+  "env": {
+    "REACT_APP_GIGACHAT_API_URL": "https://gigachat.devices.sberbank.ru/api/v1"
+  }
+}

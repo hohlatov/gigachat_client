@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Chat } from '../../types';
 import { SearchInput } from './SearchInput';
 import { ChatList } from './ChatList';
@@ -28,12 +28,17 @@ export const Sidebar: React.FC<SidebarProps> = ({
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
 
-  const query = searchQuery.toLowerCase();
-  const filteredChats = chats.filter((chat) => {
-    const titleMatch = chat.title.toLowerCase().includes(query);
-    const lastMessage = chat.messages.at(-1)?.content.toLowerCase() ?? '';
-    return titleMatch || lastMessage.includes(query);
-  });
+  // Оптимизируем фильтрацию чатов с useMemo
+  const filteredChats = useMemo(() => {
+    const query = searchQuery.toLowerCase();
+    if (!query) return chats;
+    
+    return chats.filter((chat) => {
+      const titleMatch = chat.title.toLowerCase().includes(query);
+      const lastMessage = chat.messages.at(-1)?.content.toLowerCase() ?? '';
+      return titleMatch || lastMessage.includes(query);
+    });
+  }, [chats, searchQuery]);
 
   return (
     <>

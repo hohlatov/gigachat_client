@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Button } from '../ui/Button';
 import './InputArea.css';
 
@@ -21,7 +21,7 @@ export const InputArea: React.FC<InputAreaProps> = ({
     const textarea = textareaRef.current;
     if (textarea) {
       textarea.style.height = 'auto';
-      const newHeight = Math.min(textarea.scrollHeight, 120); // Max 5 lines
+      const newHeight = Math.min(textarea.scrollHeight, 120);
       textarea.style.height = `${newHeight}px`;
     }
   };
@@ -30,7 +30,8 @@ export const InputArea: React.FC<InputAreaProps> = ({
     adjustTextareaHeight();
   }, [message]);
 
-  const handleSend = () => {
+  // Оптимизируем handleSend с useCallback
+  const handleSend = useCallback(() => {
     if (message.trim() && !isLoading) {
       onSend(message.trim());
       setMessage('');
@@ -38,7 +39,7 @@ export const InputArea: React.FC<InputAreaProps> = ({
         textareaRef.current.style.height = 'auto';
       }
     }
-  };
+  }, [message, isLoading, onSend]);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
