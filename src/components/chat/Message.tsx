@@ -47,6 +47,14 @@ export const Message: React.FC<MessageProps> = ({ message, variant }) => {
           <span className="message-time">{formatTime(message.timestamp)}</span>
         </div>
         <div className="message-body">
+            {/* Отображение прикреплённого изображения */}
+            {message.image && (
+              <img
+              src={`data:${message.image.mimeType};base64,${message.image.data}`}
+              alt="Прикреплённое изображение"
+              className="message-image"
+            />
+          )}
           <ReactMarkdown
             rehypePlugins={[rehypeHighlight]}
             components={{

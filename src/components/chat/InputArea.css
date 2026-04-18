@@ -83,3 +83,38 @@
     display: none;
   }
 }
+
+.input-image-preview {
+  position: relative;
+  display: inline-block;
+  margin: 8px 12px 0;
+}
+
+.input-preview-img {
+  max-height: 120px;
+  max-width: 200px;
+  border-radius: 8px;
+  object-fit: cover;
+  border: 2px solid var(--border-color, #e5e7eb);
+}
+
+.input-remove-image {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: #ef4444;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.input-attach-btn-active {
+  color: #3b82f6;
+}

@@ -173,3 +173,12 @@
     max-width: 85%;
   }
 }
+
+.message-image {
+  max-width: 300px;
+  max-height: 300px;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  object-fit: cover;
+  display: block;
+}

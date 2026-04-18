@@ -19,7 +19,7 @@ export const AuthForm: React.FC<AuthFormProps> = ({ onLogin }) => {
     setError('');
 
     if (!credentials.trim()) {
-      setError('Введите client_id:client_secret или Base64 этой пары');
+      setError('Введите учётные данные');
       return;
     }
 
@@ -29,13 +29,8 @@ export const AuthForm: React.FC<AuthFormProps> = ({ onLogin }) => {
     } catch (loginError) {
       const message =
         loginError instanceof Error ? loginError.message : 'Не удалось получить токен';
-      if (
-        message === 'Failed to fetch' ||
-        (loginError instanceof TypeError && message.toLowerCase().includes('fetch'))
-      ) {
-        setError(
-          'Не удалось связаться с сервером (часто сеть или CORS). Перезапустите npm start — в разработке используется прокси. Проверьте VPN и доступ к интернету.'
-        );
+      if (message === 'Failed to fetch' || message.toLowerCase().includes('fetch')) {
+        setError('Не удалось связаться с сервером. Проверьте VPN и интернет-соединение.');
       } else {
         setError(message);
       }
@@ -61,7 +56,7 @@ export const AuthForm: React.FC<AuthFormProps> = ({ onLogin }) => {
         <form onSubmit={handleSubmit} className="auth-form-content">
           <div className="auth-field">
             <label className="auth-label" htmlFor="credentials">
-              Учётные данные OAuth (Basic)
+              Учётные данные
             </label>
             <input
               type="password"
@@ -73,75 +68,30 @@ export const AuthForm: React.FC<AuthFormProps> = ({ onLogin }) => {
               autoComplete="off"
               disabled={isSubmitting}
             />
-            <p className="auth-hint">
-              В личном кабинете GigaChat возьмите <code className="auth-hint-code">client_id</code> и{' '}
-              <code className="auth-hint-code">client_secret</code>. Можно вставить строку{' '}
-              <code className="auth-hint-code">client_id:client_secret</code> — приложение само
-              закодирует её в Base64. Либо вставьте уже готовую Base64-строку (без префикса «Basic »).
-              После входа будет получен <code className="auth-hint-code">access_token</code> по OAuth.
-            </p>
-            <p className="auth-hint auth-hint-secondary">
-              Пример в Node.js:
-              <code className="auth-hint-code auth-hint-code-block">
-                {`Buffer.from('client_id:client_secret').toString('base64')`}
-              </code>
-            </p>
-            <p className="auth-hint auth-hint-secondary">
-              Локально запросы к GigaChat идут через прокси dev-сервера (иначе браузер блокирует их
-              из‑за CORS). Не задавайте в <code className="auth-hint-code">.env</code> относительные
-              пути вроде <code className="auth-hint-code">/api/v2/oauth</code> — оставьте переменные
-              пустыми или укажите полный <code className="auth-hint-code">https://...</code>. Если
-              видите «Failed to fetch», перезапустите <code className="auth-hint-code">npm start</code>
-              и проверьте VPN/сеть.
-            </p>
             {error && <ErrorMessage message={error} />}
           </div>
 
           <div className="auth-field">
-            <label className="auth-label">Scope</label>
+            <label className="auth-label">Тип доступа</label>
             <div className="auth-radio-group">
-              <label className="auth-radio">
-                <input
-                  type="radio"
-                  name="scope"
-                  value="GIGACHAT_API_PERS"
-                  checked={scope === 'GIGACHAT_API_PERS'}
-                  onChange={(e) =>
-                    setScope(e.target.value as AuthCredentials['scope'])
-                  }
-                  className="auth-radio-input"
-                  disabled={isSubmitting}
-                />
-                <span className="auth-radio-label">Персональный</span>
-              </label>
-              <label className="auth-radio">
-                <input
-                  type="radio"
-                  name="scope"
-                  value="GIGACHAT_API_B2B"
-                  checked={scope === 'GIGACHAT_API_B2B'}
-                  onChange={(e) =>
-                    setScope(e.target.value as AuthCredentials['scope'])
-                  }
-                  className="auth-radio-input"
-                  disabled={isSubmitting}
-                />
-                <span className="auth-radio-label">B2B</span>
-              </label>
-              <label className="auth-radio">
-                <input
-                  type="radio"
-                  name="scope"
-                  value="GIGACHAT_API_CORP"
-                  checked={scope === 'GIGACHAT_API_CORP'}
-                  onChange={(e) =>
-                    setScope(e.target.value as AuthCredentials['scope'])
-                  }
-                  className="auth-radio-input"
-                  disabled={isSubmitting}
-                />
-                <span className="auth-radio-label">Корпоративный</span>
-              </label>
+              {[
+                { value: 'GIGACHAT_API_PERS', label: 'Персональный' },
+                { value: 'GIGACHAT_API_B2B', label: 'B2B' },
+                { value: 'GIGACHAT_API_CORP', label: 'Корпоративный' },
+              ].map(({ value, label }) => (
+                <label className="auth-radio" key={value}>
+                  <input
+                    type="radio"
+                    name="scope"
+                    value={value}
+                    checked={scope === value}
+                    onChange={(e) => setScope(e.target.value as AuthCredentials['scope'])}
+                    className="auth-radio-input"
+                    disabled={isSubmitting}
+                  />
+                  <span className="auth-radio-label">{label}</span>
+                </label>
+              ))}
             </div>
           </div>
 

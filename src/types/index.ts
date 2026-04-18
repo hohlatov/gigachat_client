@@ -1,8 +1,14 @@
+export interface MessageImage {
+  data: string;      
+  mimeType: string; 
+}
+
 export interface Message {
   id: string;
   content: string;
   role: 'system' | 'user' | 'assistant';
   timestamp: Date;
+  image?: MessageImage; 
 }
 
 export interface Chat {

@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { Chat as ChatType, Message as MessageType, Settings } from '../../types';
+import { Chat as ChatType, Message as MessageType, MessageImage, Settings } from '../../types';
 import { MessageList } from './MessageList';
 import { InputArea } from './InputArea';
 import { Button } from '../ui/Button';
@@ -46,15 +46,16 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
     return 'Новый чат';
   };
 
-  const handleSendMessage = async (text: string) => {
+  const handleSendMessage = async (text: string, image?: MessageImage) => {
     const trimmed = text.trim();
-    if (!trimmed || isLoading || !activeChat) return;
+    if ((!trimmed && !image) || isLoading || !activeChat) return;
 
     const userMessage: MessageType = {
       id: createId(),
       content: trimmed,
       role: 'user',
       timestamp: new Date(),
+      image: image,
     };
 
     if (!activeChat.messages.length && activeChat.title === 'Новый чат') {
