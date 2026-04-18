@@ -1,20 +1,3 @@
-# GigaChat Client
-
-Клиентское приложение для работы с API GigaChat на React + TypeScript.
-
-## 🌐 Демо
-
-[Ссылка на развернутое приложение](https://your-app-url.vercel.app)
-
-### Скриншоты
-
-![Главный экран](./docs/screenshot-main.png)
-![Настройки](./docs/screenshot-settings.png)
-
-### Анализ бандла
-
-![Bundle Analysis](./docs/bundle-analysis.png)
-
 ## 🛠 Стек технологий
 
 - **React** 19.2.4
